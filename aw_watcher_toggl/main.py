@@ -153,7 +153,7 @@ def main():
         try:
             if entry:
                 data = {"project": projects[entry["project_id"]] if entry["project_id"] is not None else "No project",
-                        "title": entry["description"] if entry["description"] is not "" else "No Name" , 
+                        "title": entry["description"] if entry["description"] != "" else "No Name" , 
                         "tags":str(entry["tags"]), 
                         "uid": entry["id"]}
                 print_statusline(f"Active Entry: {data['title']}")
