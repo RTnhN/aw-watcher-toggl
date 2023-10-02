@@ -22,9 +22,9 @@ jobs:
         poetry install
     - name: Check that it's correctly installed
       run: |
-        poetry run which aw-watcher-spotify
-        poetry run python3 -c 'import aw_watcher_spotify'
+        poetry run which aw-watcher-toggl
+        poetry run python3 -c 'import aw_watcher_toggl'
     - name: Typecheck with mypy
       run: |
         poetry run mypy --install-types
-        poetry run mypy --ignore-missing-imports aw_watcher_spotify
+        poetry run mypy --ignore-missing-imports aw_watcher_toggl

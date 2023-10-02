@@ -1,7 +1,7 @@
-aw-watcher-spotify
+aw-watcher-toggl
 ==================
 
-Watches your currently playing Spotify track. This is on a per-user basis since it uses the Spotify Web API, so you don't need to run it on all your machines if you don't want the redundancy.
+This extension both gets the past and current timers in Toggl and also checks for live timers. 
 
 This watcher is currently in a early stage of development, please submit PRs if you find bugs!
 
@@ -10,26 +10,9 @@ This watcher is currently in a early stage of development, please submit PRs if 
 
 ### Step 0: Create Spotify Web API token
 
-Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/applications) and create a new application.
+Go to [Toggl profile page](https://track.toggl.com/profile) and find the api token.
 
-In the app settings, add `http://localhost:8088` in the Redirect URIs section.
-
-### Step 1: Install package (using poetry)
-
-Requirements: Requires that you have poetry installed.
-
-First install the package and its dependencies:
-
-```sh
-poetry install
-```
-
-First run (generates empty config that you need to fill out):
-
-```sh
-poetry run aw-watcher-spotify
-```
-### Step 1: Install package (without poetry, using only pip)
+### Step 1: Install package 
 
 Install the requirements:
 
@@ -39,29 +22,13 @@ pip install .
 
 First run (generates empty config that you need to fill out):
 ```sh
-python aw-watcher-spotify/main.py
+python aw-watcher-toggl/main.py
 ```
 
-### Step 2: Enter credentials
+### Step 2: Enter config
 
-If this is the first time you run it on your machine, it will give you an error, this is normal.
-Just fill in the config file (the directory is referenced in the error).
+Add your api token to the config. You can also enable backfilling of toggl tasks if you want to start with a full toggl bucket. You don't need to worry about duplicate entries being added since it only adds Toggl events if they have not been added before by checking against the uid. 
 
-Run the script again and...
-You're done! Try playing a song on Spotify on any of your devices and it should start logging (provided they are not in offline mode).
+### Step 3: Restart the server and enable the watcher
 
 
-## Note
-
-Even without using this watcher, you can get a full export of the last year of listening history by requesting an export directly from Spotify here: https://www.spotify.com/us/account/privacy/
-
-The export contains, among other things:
-
-- **Streaming history for the past year**
-- Playlists
-- Search queries
-- A list of items saved in your library
-- User data
-- Inferences
-
-(thanks [@oreHGA](https://github.com/oreHGA) for the tip!)
