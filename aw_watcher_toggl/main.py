@@ -158,7 +158,7 @@ def main():
                         "uid": entry["id"]}
                 print_statusline(f"Active Entry: {data['title']}")
                 event = Event(timestamp=datetime.now(timezone.utc), data=data)
-                aw.heartbeat(bucketname, event, pulsetime=poll_time + 1, queued=True)
+                aw.heartbeat(bucketname, event, pulsetime=poll_time + 5, queued=True)
             else:
                 print_statusline("No current entries.")
         except Exception as e:
