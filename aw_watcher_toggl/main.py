@@ -125,7 +125,7 @@ def main():
     aw = ActivityWatchClient("aw-watcher-toggl", testing=False)
     bucketname = "{}_{}".format(aw.client_name, aw.client_hostname)
     if aw.get_buckets().get(bucketname) == None:
-       aw.create_bucket(bucketname, event_type="toggl_data", queued=True)
+        aw.create_bucket(bucketname, event_type="toggl_data", queued=True)
     aw.connect()
 
     if backfill:
