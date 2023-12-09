@@ -8,6 +8,7 @@ from time import sleep
 from datetime import datetime, timezone, timedelta
 from calendar import monthrange
 import json
+from collections import defaultdict
 
 import requests
 from requests import ConnectionError
@@ -21,7 +22,8 @@ DEFAULT_CONFIG = """
 [aw-watcher-toggl]
 api_token = ""
 poll_time = 5.0
-backfill = false"""
+backfill = false
+update_existing_events = true"""
 
 
 def get_time_entries(api_token):
@@ -63,22 +65,28 @@ def get_projects(api_token):
 
     return {proj["id"]: proj["name"] for proj in response.json()}
 
-def process_time_entries(aw, bucketname, entries, projects):
-    already_logged_events = aw.get_events(bucketname)
+def process_time_entries(aw, bucketname, entries, projects, update_existing_events):
+    already_logged_events = defaultdict(list)
+    for event in aw.get_events(bucketname):
+        already_logged_events[event["data"]["uid"]].append(event["id"])
     added_tasks = 0
     for entry in entries:
-        if any(entry["id"] == event["data"]["uid"] for event in already_logged_events):
-            continue
         if entry["description"] == "":
             continue
+        if entry["id"] in already_logged_events:
+            if not update_existing_events:
+                continue
+            for aw_event_id in already_logged_events[entry["id"]]:
+                aw.delete_event(bucketname, aw_event_id)
+
         data = {"project": projects[entry["project_id"]] if entry["project_id"] is not None else "No project",
-                "title": entry["description"] if entry["description"] is not None else "No name" , 
-                "tags":str(entry["tags"]), 
+                "title": entry["description"] if entry["description"] is not None else "No name" ,
+                "tags":str(entry["tags"]),
                 "uid": entry["id"]}
         timestamp = entry["start"]
         duration = entry["duration"]
         new_event = Event(timestamp=timestamp, duration=duration, data=data)
-        inserted_event = aw.insert_event(bucketname, new_event)
+        aw.insert_event(bucketname, new_event)
         added_tasks += 1
         print_statusline('Title: {}, Start: {}, Duration: {}'.format(entry['description'], entry['start'], entry['duration']))
     print_statusline(f"Added {added_tasks} task(s)")
@@ -105,6 +113,7 @@ def main():
     poll_time = float(config["aw-watcher-toggl"].get("poll_time"))
     token = config["aw-watcher-toggl"].get("api_token", None)
     backfill = config["aw-watcher-toggl"].get("backfill", False)
+    update_existing_events = config["aw-watcher-toggl"].get("update_existing_events", False)
     if not token:
         logger.warning(
             """Toggl API token not specified in config file (in folder {}). 
@@ -123,7 +132,7 @@ def main():
         print_statusline("Backfilling toggl data...")
         entries = get_time_entries(token)
         projects = get_projects(token)
-        process_time_entries(aw, bucketname, entries, projects)
+        process_time_entries(aw, bucketname, entries, projects, update_existing_events)
 
     entries = None
     projects = None
