@@ -8,7 +8,7 @@ This watcher is currently in a early stage of development, please submit PRs if 
 
 ## Usage
 
-### Step 0: Create Spotify Web API token
+### Step 0: Create Toggl Web API token
 
 Go to [Toggl profile page](https://track.toggl.com/profile) and find the api token.
 
