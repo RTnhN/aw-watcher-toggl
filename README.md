@@ -33,4 +33,6 @@ I recently also added the option to update entries from toggl. Sometimes you upd
 
 ### Step 3: Restart the server and enable the watcher
 
+Don't forget to add it to the aw-qt.toml file so that it gets started automatically when AW starts. 
+
 
