@@ -133,11 +133,9 @@ def main():
     token = config["aw-watcher-toggl"].get("api_token", None)
     backfill = config["aw-watcher-toggl"].get("backfill", False)
     backfill_since = config["aw-watcher-toggl"].get("backfill_since", None)
-    backfill_since = (
-        datetime.strptime(backfill_since, "%Y-%m-%d")
-        if backfill_since
-        else datetime.now() - timedelta(days=32)
-    ).replace(day=1)
+    backfill_since = (backfill_since or datetime.now() - timedelta(days=32)).replace(
+        day=1
+    )
 
     update_existing_events = config["aw-watcher-toggl"].get(
         "update_existing_events", False
