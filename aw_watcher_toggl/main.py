@@ -26,16 +26,15 @@ backfill = false
 update_existing_events = true"""
 
 
-def get_time_entries(api_token):
-    now = datetime.now()
+def get_time_entries(api_token, month: datetime = None):
+    month = month or datetime.now()
 
     # Calculate the first day of the last month
-    last_month_first_day = datetime(now.year, now.month - 1, 1) if now.month > 1 else datetime(now.year - 1, 12, 1)
-    formatted_first_day_last_month = last_month_first_day.strftime('%Y-%m-%d')
-    formatted_now = now.strftime('%Y-%m-%d')
-    auth = (api_token, 'api_token')
-    url = f'https://api.track.toggl.com/api/v9/me/time_entries?start_date={formatted_first_day_last_month}&end_date={formatted_now}'
-    headers = {'Content-Type': 'application/json'}
+    month_first_day = month.replace(day=1)
+    month_last_day = month.replace(day=monthrange(month.year, month.month)[1])
+    auth = (api_token, "api_token")
+    url = f"https://api.track.toggl.com/api/v9/me/time_entries?start_date={month_first_day.strftime('%Y-%m-%d')}&end_date={month_last_day.strftime('%Y-%m-%d')}"
+    headers = {"Content-Type": "application/json"}
     response = requests.get(url=url, auth=auth, headers=headers, timeout=5)
 
     if response.status_code != 200:
