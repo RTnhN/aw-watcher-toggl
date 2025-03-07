@@ -20,10 +20,11 @@ from aw_client.client import ActivityWatchClient
 logger = logging.getLogger("aw-watcher-toggl")
 DEFAULT_CONFIG = """
 [aw-watcher-toggl]
-api_token = ""
-poll_time = 5.0
-backfill = false
-update_existing_events = true"""
+api_token = "" # Toggl API token
+poll_time = 300.0 # Polling time in seconds
+backfill = false # Whether to backfill data missing data
+backfill_since = "" # Format: "YYYY-MM-DD" Day is ignored!
+update_existing_events = true # Whether to update existing events"""
 
 
 def get_time_entries(api_token, month: datetime = None):
@@ -126,7 +127,13 @@ def main():
     poll_time = float(config["aw-watcher-toggl"].get("poll_time"))
     token = config["aw-watcher-toggl"].get("api_token", None)
     backfill = config["aw-watcher-toggl"].get("backfill", False)
-    update_existing_events = config["aw-watcher-toggl"].get("update_existing_events", False)
+    backfill_since = config["aw-watcher-toggl"].get("backfill_since", None)
+    backfill_since = (
+        datetime.strptime(backfill_since, "%Y-%m-%d") if backfill_since else None
+    )
+    update_existing_events = config["aw-watcher-toggl"].get(
+        "update_existing_events", False
+    )
     if not token:
         logger.warning(
             """Toggl API token not specified in config file (in folder {}). 
@@ -137,15 +144,38 @@ def main():
     # TODO: Fix --testing flag and set testing as appropriate
     aw = ActivityWatchClient("aw-watcher-toggl", testing=False)
     bucketname = "{}_{}".format(aw.client_name, aw.client_hostname)
-    if aw.get_buckets().get(bucketname) == None:
+    if aw.get_buckets().get(bucketname) is None:
         aw.create_bucket(bucketname, event_type="toggl_data", queued=True)
     aw.connect()
 
     if backfill:
-        print_statusline("Backfilling toggl data...")
-        entries = get_time_entries(token)
-        projects = get_projects(token)
-        process_time_entries(aw, bucketname, entries, projects, update_existing_events)
+        backfill_since = (
+            backfill_since or datetime.now() - timedelta(days=32)
+        ).replace(day=1)
+        print_statusline("Backfilling toggl data since {}...".format(backfill_since))
+        # Start with current month
+        current_month = backfill_since
+
+        while current_month < datetime.now():
+            print_statusline(
+                f"Backfilling toggl data for {current_month.strftime('%B %Y')}..."
+            )
+            entries = get_time_entries(token, current_month)
+
+            if not entries:
+                print_statusline(
+                    f"No entries found for {current_month.strftime('%B %Y')}"
+                )
+
+            projects = get_projects(token)
+            process_time_entries(
+                aw, bucketname, entries, projects, update_existing_events
+            )
+
+            # Go forward by one month
+            current_month = (current_month + timedelta(days=32)).replace(day=1)
+        else:
+            print_statusline("Backfilling done.")
 
     entries = None
     projects = None
