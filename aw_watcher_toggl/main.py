@@ -134,8 +134,11 @@ def main():
     backfill = config["aw-watcher-toggl"].get("backfill", False)
     backfill_since = config["aw-watcher-toggl"].get("backfill_since", None)
     backfill_since = (
-        datetime.strptime(backfill_since, "%Y-%m-%d") if backfill_since else None
-    )
+        datetime.strptime(backfill_since, "%Y-%m-%d")
+        if backfill_since
+        else datetime.now() - timedelta(days=32)
+    ).replace(day=1)
+
     update_existing_events = config["aw-watcher-toggl"].get(
         "update_existing_events", False
     )
@@ -153,10 +156,19 @@ def main():
         aw.create_bucket(bucketname, event_type="toggl_data", queued=True)
     aw.connect()
 
+    # Check for backfill already having been done
+    if (
+        aw.get_eventcount(
+            bucketname,
+            start=backfill_since,
+            end=backfill_since + timedelta(days=32),
+        )
+        > 1
+    ):
+        print_statusline("Backfill already done, skipping.")
+        backfill = False
+
     if backfill:
-        backfill_since = (
-            backfill_since or datetime.now() - timedelta(days=32)
-        ).replace(day=1)
         print_statusline("Backfilling toggl data since {}...".format(backfill_since))
         # Start with current month
         current_month = backfill_since
