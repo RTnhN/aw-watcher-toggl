@@ -3,7 +3,6 @@
 import sys
 import logging
 import traceback
-from typing import Optional
 from time import sleep
 from datetime import datetime, timezone, timedelta
 from calendar import monthrange
@@ -43,10 +42,11 @@ def get_time_entries(api_token, month: datetime = None):
 
     return response.json()
 
+
 def get_current_time_entry(api_token):
-    auth = (api_token, 'api_token')
+    auth = (api_token, "api_token")
     url = "https://api.track.toggl.com/api/v9/me/time_entries/current"
-    headers = {'Content-Type': 'application/json'}
+    headers = {"Content-Type": "application/json"}
     response = requests.get(url=url, auth=auth, headers=headers, timeout=5)
 
     if response.status_code != 200:
@@ -54,16 +54,18 @@ def get_current_time_entry(api_token):
 
     return response.json()
 
+
 def get_projects(api_token):
-    auth = (api_token, 'api_token')
-    url = 'https://api.track.toggl.com/api/v9/me/projects'
-    headers = {'Content-Type': 'application/json'}
+    auth = (api_token, "api_token")
+    url = "https://api.track.toggl.com/api/v9/me/projects"
+    headers = {"Content-Type": "application/json"}
     response = requests.get(url, auth=auth, headers=headers, timeout=5)
 
     if response.status_code != 200:
         raise requests.exceptions.HTTPError(response.text)
 
     return {proj["id"]: proj["name"] for proj in response.json()}
+
 
 def process_time_entries(aw, bucketname, entries, projects, update_existing_events):
     already_logged_events = defaultdict(list)
@@ -108,7 +110,9 @@ def process_time_entries(aw, bucketname, entries, projects, update_existing_even
 
 def load_config():
     from aw_core.config import load_config_toml as _load_config
+
     return _load_config("aw-watcher-toggl", DEFAULT_CONFIG)
+
 
 def print_statusline(msg):
     last_msg_length = (
@@ -117,6 +121,7 @@ def print_statusline(msg):
     print(" " * last_msg_length, end="\r")
     print(msg, end="\r")
     print_statusline.last_msg = msg
+
 
 def main():
     logging.basicConfig(level=logging.INFO)
@@ -204,10 +209,16 @@ def main():
 
         try:
             if entry:
-                data = {"project": projects[entry["project_id"]] if entry["project_id"] is not None else "No project",
-                        "title": entry["description"] if entry["description"] != "" else "No Name" , 
-                        "tags":str(entry["tags"]), 
-                        "uid": entry["id"]}
+                data = {
+                    "project": projects[entry["project_id"]]
+                    if entry["project_id"] is not None
+                    else "No project",
+                    "title": entry["description"]
+                    if entry["description"] != ""
+                    else "No Name",
+                    "tags": str(entry["tags"]),
+                    "uid": entry["id"],
+                }
                 print_statusline(f"Active Entry: {data['title']}")
                 event = Event(timestamp=datetime.now(timezone.utc), data=data)
                 aw.heartbeat(bucketname, event, pulsetime=poll_time + 5, queued=True)
