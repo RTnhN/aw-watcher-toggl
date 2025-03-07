@@ -71,24 +71,38 @@ def process_time_entries(aw, bucketname, entries, projects, update_existing_even
         already_logged_events[event["data"]["uid"]].append(event["id"])
     added_tasks = 0
     for entry in entries:
+        project_name = (
+            projects[entry["project_id"]] if entry["project_id"] is not None else ""
+        )
         if entry["description"] == "":
-            continue
+            # Needs a title otherwise won't be displayed in the UI
+            # Form one from the project name and timestamp
+            entry["description"] = f"{project_name}"
+        else:
+            entry["description"] = f"{project_name} - {entry['description']}"
         if entry["id"] in already_logged_events:
             if not update_existing_events:
                 continue
             for aw_event_id in already_logged_events[entry["id"]]:
                 aw.delete_event(bucketname, aw_event_id)
 
-        data = {"project": projects[entry["project_id"]] if entry["project_id"] is not None else "No project",
-                "title": entry["description"] if entry["description"] is not None else "No name" ,
-                "tags":str(entry["tags"]),
-                "uid": entry["id"]}
+        data = {
+            "project": project_name,
+            "title": entry["description"],
+            "tags": str(entry["tags"]),
+            "uid": entry["id"],
+        }
         timestamp = entry["start"]
         duration = entry["duration"]
         new_event = Event(timestamp=timestamp, duration=duration, data=data)
+        # TODO: this could be a bulk insert
         aw.insert_event(bucketname, new_event)
         added_tasks += 1
-        print_statusline('Title: {}, Start: {}, Duration: {}'.format(entry['description'], entry['start'], entry['duration']))
+        print_statusline(
+            "Title: {}, Start: {}, Duration: {}".format(
+                entry["description"], entry["start"], entry["duration"]
+            )
+        )
     print_statusline(f"Added {added_tasks} task(s)")
 
 
