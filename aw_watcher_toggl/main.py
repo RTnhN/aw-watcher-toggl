@@ -22,7 +22,7 @@ DEFAULT_CONFIG = """
 api_token = "" # Toggl API token
 poll_time = 300.0 # Polling time in seconds
 backfill = false # Whether to backfill data missing data
-backfill_since = "" # Format: "YYYY-MM-DD" Day is ignored!
+backfill_since = 2000-01-01 # Use built-in toggl date format, so you don't wrap it in quotes. Day is ignored!
 update_existing_events = true # Whether to update existing events"""
 
 
