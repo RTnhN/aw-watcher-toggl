@@ -27,7 +27,7 @@ update_existing_events = true # Whether to update existing events"""
 
 
 def get_time_entries(api_token, month: datetime = None):
-    month = month or datetime.now()
+    month = month or datetime.now().astimezone()
 
     # Calculate the first day of the last month
     month_first_day = month.replace(day=1)
@@ -133,8 +133,14 @@ def main():
     token = config["aw-watcher-toggl"].get("api_token", None)
     backfill = config["aw-watcher-toggl"].get("backfill", False)
     backfill_since = config["aw-watcher-toggl"].get("backfill_since", None)
-    backfill_since = (backfill_since or datetime.now() - timedelta(days=32)).replace(
-        day=1
+    backfill_since = (
+        (
+            datetime.combine(backfill_since, datetime.min.time())
+            if backfill_since
+            else datetime.now() - timedelta(days=32)
+        )
+        .replace(day=1)
+        .astimezone()
     )
 
     update_existing_events = config["aw-watcher-toggl"].get(
@@ -159,7 +165,7 @@ def main():
         aw.get_eventcount(
             bucketname,
             start=backfill_since,
-            end=backfill_since + timedelta(days=32),
+            end=backfill_since + timedelta(days=30),
         )
         > 1
     ):
@@ -171,7 +177,7 @@ def main():
         # Start with current month
         current_month = backfill_since
 
-        while current_month < datetime.now():
+        while current_month < datetime.now().astimezone():
             print_statusline(
                 f"Backfilling toggl data for {current_month.strftime('%B %Y')}..."
             )
