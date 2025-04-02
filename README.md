@@ -14,6 +14,10 @@ Go to [Toggl profile page](https://track.toggl.com/profile) and find the api tok
 
 ### Step 1: Install package
 
+Here is a quick video on how to download and install. In the video I download a zip of the repo, but you can also clone the repo too if you want to make changes. 
+
+https://github.com/user-attachments/assets/0ab1c8b3-e590-4c86-926e-4bb245a857ee
+
 Install the requirements:
 
 ```sh
