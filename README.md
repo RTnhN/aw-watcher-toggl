@@ -35,6 +35,11 @@ Add your api token to the config. You can also enable backfilling of toggl tasks
 
 I recently also added the option to update entries from toggl. Sometimes you update the entries in toggl, but they are not updated in AW since it does not update same ids. This will update all identical id events by deleting the old event and adding the new event. This will also delete duplicate toggl events in AW. It will delete all toggl events with the same toggl id then write one clean toggl event.
 
+**RATE LIMITING FOR API**
+
+As of 20 June 2025, Toggl will implement rate limiting. This means that you will need to make sure that the polling time is not too small. A safe value for this would be 300 seconds. Also keep in mind that the backfill option will also cause rate problems. It would be best to set this back three months so that the rate limit does not get violated. Generally, you need to fulfill this equation: $2·N + 2·(3600/\text{poll_time}) ≤ 30$. I will perhaps add checking into the watcher to make sure that it gives a warning if the limits will get violated.  
+
+
 ### Step 3: Restart the server and enable the watcher
 
 Don't forget to add it to the aw-qt.toml file so that it gets started automatically when AW starts. 
