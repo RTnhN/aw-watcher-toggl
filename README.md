@@ -37,7 +37,7 @@ I recently also added the option to update entries from toggl. Sometimes you upd
 
 **RATE LIMITING FOR API**
 
-As of 20 June 2025, Toggl will implement rate limiting. This means that you will need to make sure that the polling time is not too small. A safe value for this would be 300 seconds. Also keep in mind that the backfill option will also cause rate problems. It would be best to set this back three months so that the rate limit does not get violated. Generally, you need to fulfill this equation: $2·N + 2·(3600/\text{poll_time}) ≤ 30$. I will perhaps add checking into the watcher to make sure that it gives a warning if the limits will get violated.  
+As of 20 June 2025, Toggl will implement rate limiting. This means that you will need to make sure that the polling time is not too small. A safe value for this would be 300 seconds. Also keep in mind that the backfill option will also cause rate problems. It would be best to set this back three months so that the rate limit does not get violated. Generally, you need to fulfill this equation: $2·N + 2·(3600/\text{pollTime}) ≤ 30$. I will perhaps add checking into the watcher to make sure that it gives a warning if the limits will get violated.  
 
 
 ### Step 3: Restart the server and enable the watcher
