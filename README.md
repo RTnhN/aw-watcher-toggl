@@ -14,19 +14,20 @@ Go to [Toggl profile page](https://track.toggl.com/profile) and find the api tok
 
 ### Step 1: Install package
 
-Here is a quick video on how to download and install. In the video I download a zip of the repo, but you can also clone the repo too if you want to make changes. 
-
-https://github.com/user-attachments/assets/0ab1c8b3-e590-4c86-926e-4bb245a857ee
-
-Install the requirements:
+Install with [uv](https://github.com/astral-sh/uv):
 
 ```sh
-pip install .
+uv sync # optional
+uv tool install .
 ```
+
+On Linux and macOS, the `aw-watcher-toggl` command is installed to `~/.local/bin`. On Windows, it is installed to `C:\Users\<your-user>\.local\bin`. Ensure the relevant directory is on your `PATH` so the binary can be resolved.
 
 First run (generates empty config that you need to fill out):
 ```sh
-python aw-watcher-toggl/main.py
+aw-watcher-toggl # Linux/macOS
+# or
+aw-watcher-toggl.exe # Windows
 ```
 
 ### Step 2: Enter config
