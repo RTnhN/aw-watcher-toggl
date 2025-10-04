@@ -38,11 +38,14 @@ I recently also added the option to update entries from toggl. Sometimes you upd
 
 **RATE LIMITING FOR API**
 
-As of 20 June 2025, Toggl will implement rate limiting. This means that you will need to make sure that the polling time is not too small. A safe value for this would be 300 seconds. Also keep in mind that the backfill option will also cause rate problems. It would be best to set this back three months so that the rate limit does not get violated. Generally, you need to fulfill this equation: $2·N + 2·(3600/\text{pollTime}) ≤ 30$. I will perhaps add checking into the watcher to make sure that it gives a warning if the limits will get violated.  
+Toggl Track is introducing API usage limits on 5 September 2025. To stay within the Free plan quota (30 requests per hour, per user, per organization) you should ensure that $2 * N + 2 * (3600/\text{pollTime}) \le 30$. 
+
+- `N` - number of months that the backfill spans (rounded up; include the current month when backfill is enabled).
+- `pollTime` - polling interval in seconds from the watcher configuration.
+
+The `2 * N` term accounts for one `/time_entries` request and one `/projects` request per backfilled month. The `2 * (3600/pollTime)` term covers the `/time_entries/current` and `/projects` requests issued each poll cycle (two requests per poll, evaluated over an hour). If you are on the Starter or Premium plans, replace `30` on the right-hand side with `240` or `600`, respectively. I will perhaps add checking into the watcher to make sure that it gives a warning if the limits will get violated.  
 
 
 ### Step 3: Restart the server and enable the watcher
 
 Don't forget to add it to the aw-qt.toml file so that it gets started automatically when AW starts. 
-
-
