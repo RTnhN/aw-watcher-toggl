@@ -155,9 +155,10 @@ def main():
 
     # TODO: Fix --testing flag and set testing as appropriate
     aw = ActivityWatchClient("aw-watcher-toggl", testing=False)
+    aw.wait_for_start(timeout=60)
     bucketname = "{}_{}".format(aw.client_name, aw.client_hostname)
     if aw.get_buckets().get(bucketname) is None:
-        aw.create_bucket(bucketname, event_type="toggl_data", queued=True)
+        aw.create_bucket(bucketname, event_type="toggl_data")
     aw.connect()
 
     # Check for backfill already having been done
